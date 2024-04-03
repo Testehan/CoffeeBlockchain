@@ -75,7 +75,7 @@ public class CoffeeBlockchain
                         return false;
                     }
 
-                    if(input.getUTXO().getValue() != tempOutput.getValue()) {
+                    if(input.getUnspentTransaction().getValue() != tempOutput.getValue()) {
                         System.out.println("#Referenced input Transaction(" + t + ") value is Invalid");
                         return false;
                     }
@@ -87,11 +87,11 @@ public class CoffeeBlockchain
                     tempUTXOs.put(output.getId(), output);
                 }
 
-                if( currentTransaction.getOutputTransactions().get(0).getReciepient() != currentTransaction.getRecipient()) {
+                if( currentTransaction.getOutputTransactions().get(0).getRecipient() != currentTransaction.getRecipient()) {
                     System.out.println("#Transaction(" + t + ") output recipient is not who it should be");
                     return false;
                 }
-                if( currentTransaction.getOutputTransactions().get(1).getReciepient() != currentTransaction.getSender()) {
+                if( currentTransaction.getOutputTransactions().get(1).getRecipient() != currentTransaction.getSender()) {
                     System.out.println("#Transaction(" + t + ") output 'change' is not sender.");
                     return false;
                 }

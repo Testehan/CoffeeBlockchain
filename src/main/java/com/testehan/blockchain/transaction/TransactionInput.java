@@ -3,7 +3,7 @@ package com.testehan.blockchain.transaction;
 public class TransactionInput {
 
     private String transactionOutputId; //Reference to TransactionOutputs -> transactionId
-    private TransactionOutput UTXO; // Contains the Unspent transaction output
+    private TransactionOutput unspentTransaction; // Contains the Unspent transaction output
 
     public TransactionInput(String transactionOutputId) {
         this.transactionOutputId = transactionOutputId;
@@ -13,11 +13,11 @@ public class TransactionInput {
         return transactionOutputId;
     }
 
-    public TransactionOutput getUTXO() {
-        return UTXO;
+    public TransactionOutput getUnspentTransaction() {
+        return unspentTransaction;
     }
 
-    public void setUTXO(TransactionOutput UTXO) {
-        this.UTXO = UTXO;
+    public void setUnspentTransaction(TransactionOutput unspentTransaction) {
+        this.unspentTransaction = unspentTransaction;
     }
 }

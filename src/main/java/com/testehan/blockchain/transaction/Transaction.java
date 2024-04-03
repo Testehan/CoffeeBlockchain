@@ -65,7 +65,7 @@ public class Transaction {
 
         //gather transaction inputs (Make sure they are unspent):
         for (TransactionInput i : inputTransactions) {
-            i.setUTXO(CoffeeBlockchain.unspentTransactions.get(i.getTransactionOutputId()));
+            i.setUnspentTransaction(CoffeeBlockchain.unspentTransactions.get(i.getTransactionOutputId()));
         }
 
         //check if transaction is valid:
@@ -87,8 +87,8 @@ public class Transaction {
 
         //remove transaction inputs from UTXO lists as spent:
         for (TransactionInput i : inputTransactions) {
-            if (i.getUTXO() == null) continue; //if Transaction can't be found skip it
-            CoffeeBlockchain.unspentTransactions.remove(i.getUTXO().getId());
+            if (i.getUnspentTransaction() == null) continue; //if Transaction can't be found skip it
+            CoffeeBlockchain.unspentTransactions.remove(i.getUnspentTransaction().getId());
         }
 
         return true;
@@ -97,10 +97,10 @@ public class Transaction {
     public long getInputTransactionsTotal() {
         long total = 0;
         for (TransactionInput i : inputTransactions) {
-            if (i.getUTXO() == null) {
+            if (i.getUnspentTransaction() == null) {
                 continue; //if Transaction can't be found skip it
             }
-            total = total + i.getUTXO().getValue();
+            total = total + i.getUnspentTransaction().getValue();
         }
         return total;
     }
