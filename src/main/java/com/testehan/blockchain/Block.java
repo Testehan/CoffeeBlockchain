@@ -75,13 +75,6 @@ public class Block {
             return false;
         }
 
-        if((!GENESIS_BLOCK_HASH.equals(previousBlockHash))) {
-            if((transaction.isTransactionValid() != true)) {
-                System.out.println("Transaction failed to process. Discarded.");
-                return false;
-            }
-        }
-
         transactions.add(transaction);
         System.out.println("Transaction Successfully added to Block");
         return true;

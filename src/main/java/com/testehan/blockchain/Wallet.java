@@ -65,7 +65,7 @@ public class Wallet {
         for (Map.Entry<String, TransactionOutput> item: unspentTransactions.entrySet()){
             TransactionOutput unspentTransaction = item.getValue();
             total = total + unspentTransaction.getValue();
-            inputs.add(new TransactionInput(unspentTransaction.getId()));
+            inputs.add(new TransactionInput(unspentTransaction));
             if(total > value) {
                 break;
             }

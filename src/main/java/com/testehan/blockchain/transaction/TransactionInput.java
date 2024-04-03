@@ -5,8 +5,9 @@ public class TransactionInput {
     private String transactionOutputId; //Reference to TransactionOutputs -> transactionId
     private TransactionOutput unspentTransaction; // Contains the Unspent transaction output
 
-    public TransactionInput(String transactionOutputId) {
-        this.transactionOutputId = transactionOutputId;
+    public TransactionInput(TransactionOutput unspentTransaction) {
+        this.transactionOutputId = unspentTransaction.getId();
+        this.unspentTransaction = unspentTransaction;
     }
 
     public String getTransactionOutputId() {

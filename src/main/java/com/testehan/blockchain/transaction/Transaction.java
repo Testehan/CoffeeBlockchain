@@ -1,6 +1,5 @@
 package com.testehan.blockchain.transaction;
 
-import com.testehan.blockchain.CoffeeBlockchain;
 import com.testehan.blockchain.Wallet;
 import com.testehan.blockchain.util.StringUtil;
 
@@ -17,7 +16,7 @@ public class Transaction {
     private long value;  // this is in sathosi :)
     private byte[] signature; // this is to prevent anybody else from spending funds in our wallet.
 
-    private List<TransactionInput> inputTransactions;
+    private List<TransactionInput> inputTransactions = new ArrayList<>();
     private List<TransactionOutput> outputTransactions = new ArrayList<>();
 
     private static int sequence = 0; // a rough count of how many transactions have been generated.
@@ -27,7 +26,10 @@ public class Transaction {
         this.sender = from.getPublicKey();
         this.recipient = to;
         this.value = value;
-        this.inputTransactions = inputTransactions;
+        if (inputTransactions != null) {
+            this.inputTransactions = inputTransactions;
+        }
+        this.transactionId = calculateHash();
 
         generateSignature(from.getPrivateKey());
     }
@@ -54,44 +56,6 @@ public class Transaction {
     public boolean verifiySignature() {
         String data = StringUtil.getStringFromKey(sender) + StringUtil.getStringFromKey(recipient) + value;
         return StringUtil.verifyECDSASig(sender, data, signature);
-    }
-
-    public boolean isTransactionValid() {
-
-        if (verifiySignature() == false) {
-            System.out.println("#Transaction Signature failed to verify");
-            return false;
-        }
-
-        //gather transaction inputs (Make sure they are unspent):
-        for (TransactionInput i : inputTransactions) {
-            i.setUnspentTransaction(CoffeeBlockchain.unspentTransactions.get(i.getTransactionOutputId()));
-        }
-
-        //check if transaction is valid:
-        if (getInputTransactionsTotal() < CoffeeBlockchain.minimumTransactionInSatoshi) {
-            System.out.println("#Transaction Inputs to small: " + getInputTransactionsTotal());
-            return false;
-        }
-
-        //generate transaction outputs:
-        long leftOver = getInputTransactionsTotal() - value; //get value of inputs then the left over change:
-        transactionId = calculateHash();
-        outputTransactions.add(new TransactionOutput(this.recipient, value, transactionId)); //send value to recipient
-        outputTransactions.add(new TransactionOutput(this.sender, leftOver, transactionId)); //send the left over 'change' back to sender
-
-        //add outputs to Unspent list
-        for (TransactionOutput o : outputTransactions) {
-            CoffeeBlockchain.unspentTransactions.put(o.getId(), o);
-        }
-
-        //remove transaction inputs from UTXO lists as spent:
-        for (TransactionInput i : inputTransactions) {
-            if (i.getUnspentTransaction() == null) continue; //if Transaction can't be found skip it
-            CoffeeBlockchain.unspentTransactions.remove(i.getUnspentTransaction().getId());
-        }
-
-        return true;
     }
 
     public long getInputTransactionsTotal() {

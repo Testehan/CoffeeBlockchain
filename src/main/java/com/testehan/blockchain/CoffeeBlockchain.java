@@ -25,6 +25,7 @@ public class CoffeeBlockchain
         blockchain.add(newBlock);
     }
 
+    // TODO Refactor this method.. it is too long and complex
     public static Boolean isChainValid() {
         Block currentBlock;
         Block previousBlock;
@@ -113,5 +114,46 @@ public class CoffeeBlockchain
             }
         }
         return balanceAvailable;
+    }
+
+    public static boolean isTransactionValid(Transaction transaction) {
+
+        if (transaction.verifiySignature() == false) {
+            System.out.println("#Transaction Signature failed to verify");
+            return false;
+        }
+
+        //gather transaction inputs (Make sure they are unspent):
+        for (TransactionInput i : transaction.getInputTransactions()) {
+            i.setUnspentTransaction(unspentTransactions.get(i.getTransactionOutputId()));
+        }
+
+        //check if transaction is valid:
+        long inputTransactionsTotal = transaction.getInputTransactionsTotal();
+        if (inputTransactionsTotal < minimumTransactionInSatoshi) {
+            System.out.println("#Transaction Inputs to small: " + inputTransactionsTotal);
+            return false;
+        }
+
+        //generate transaction outputs:
+        long leftOver = inputTransactionsTotal - transaction.getValue(); //get value of inputs then the left over change:
+        // todo maybe shorthen these lines
+        transaction.getOutputTransactions().add(new TransactionOutput(transaction.getRecipient(), transaction.getValue(), transaction.getTransactionId())); //send value to recipient
+        transaction.getOutputTransactions().add(new TransactionOutput(transaction.getSender(), leftOver, transaction.getTransactionId())); //send the left over 'change' back to sender
+
+        //add outputs to Unspent list
+        for (TransactionOutput o :  transaction.getOutputTransactions()) {
+            unspentTransactions.put(o.getId(), o);
+        }
+
+        //remove transaction inputs from UTXO lists as spent:
+        for (TransactionInput i :  transaction.getInputTransactions()) {
+            if (i.getUnspentTransaction() == null) {
+                continue; //if Transaction can't be found skip it
+            }
+            unspentTransactions.remove(i.getUnspentTransaction().getId());
+        }
+
+        return true;
     }
 }

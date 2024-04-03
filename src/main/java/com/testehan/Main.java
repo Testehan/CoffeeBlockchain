@@ -20,7 +20,7 @@ public class Main {
 
 
     private static void test_wallets_and_a_single_transaction(){
-        //Setup Bouncey castle as a Security Provider
+        //Setup Bouncy castle as a Security Provider
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         //Create the new wallets
@@ -28,7 +28,7 @@ public class Main {
         Wallet walletB = new Wallet();
         Wallet coinbase = new Wallet();
 
-        //create genesis transaction, which sends 100 NoobCoin to walletA:
+        //create genesis transaction, which sends initial coins to walletA:
         genesisTransaction = new Transaction(coinbase, walletA.getPublicKey(), 2000000000, null);
         genesisTransaction.setTransactionId("0"); //manually set the transaction id
         genesisTransaction.addOutputTransaction(new TransactionOutput(genesisTransaction.getRecipient(), genesisTransaction.getValue(), genesisTransaction.getTransactionId())); //manually add the Transactions Output
@@ -36,7 +36,7 @@ public class Main {
 
         System.out.println("Creating and Mining Genesis block... ");
         Block genesisBlock = new Block();
-        genesisBlock.addTransaction(genesisTransaction);
+        genesisBlock.addTransaction(genesisTransaction);    // for genesis we don't verify validity of transaction
         addToBlockchain(genesisBlock);
 
         //testing
@@ -46,8 +46,11 @@ public class Main {
         System.out.println("\nWalletA's balance is: " + availableBalanceWalletA);
         if (availableBalanceWalletA > 40) {
             System.out.println("\nWalletA is Attempting to send funds (40) to WalletB...");
-            block1.addTransaction(walletA.sendFunds(walletB.getPublicKey(), 40));
-            addToBlockchain(block1);
+            Transaction transaction = walletA.sendFunds(walletB.getPublicKey(), 40);
+            if (isTransactionValid(transaction)) {
+                block1.addTransaction(transaction);
+                addToBlockchain(block1);
+            }
         } else {
             System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
         }
@@ -60,8 +63,11 @@ public class Main {
         Block block2 = new Block(block1.getCurrentBlockHash());
         if (availableBalanceWalletA > 1000) {
             System.out.println("\nWalletA Attempting to send more funds (1000) than it has...");
-            block2.addTransaction(walletA.sendFunds(walletB.getPublicKey(), 1000));
-            addToBlockchain(block2);
+            Transaction transaction = walletA.sendFunds(walletB.getPublicKey(), 1000);
+            if (isTransactionValid(transaction)) {
+                block2.addTransaction(transaction);
+                addToBlockchain(block2);
+            }
         } else {
             System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
         }
@@ -72,10 +78,14 @@ public class Main {
         System.out.println("WalletB's balance is: " + availableBalanceWalletB);
 
         Block block3 = new Block(block2.getCurrentBlockHash());
-        if (availableBalanceWalletB > 1000) {
+        if (availableBalanceWalletB > 20) {
             System.out.println("\nWalletB is Attempting to send funds (20) to WalletA...");
-            block3.addTransaction(walletB.sendFunds( walletA.getPublicKey(), 20));
-            addToBlockchain(block3);
+            Transaction transaction = walletB.sendFunds(walletA.getPublicKey(), 20);
+            if (isTransactionValid(transaction)) {
+                block3.addTransaction(transaction);
+                addToBlockchain(block3);
+            }
+
         } else {
             System.out.println("#Not Enough funds to send transaction. Transaction Discarded.");
         }
@@ -86,6 +96,9 @@ public class Main {
         System.out.println("WalletB's balance is: " + availableBalanceWalletB);
 
         isChainValid();
+
+        String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
+        System.out.println(blockchainJson);
 
 
 
