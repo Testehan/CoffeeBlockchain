@@ -1,10 +1,11 @@
-package com.testehan.blockchain;
+package com.testehan.blockchain.util;
 
 import com.testehan.blockchain.transaction.Transaction;
 
 import java.security.*;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 public class StringUtil {
 
@@ -64,12 +65,12 @@ public class StringUtil {
     // TODO Try to understand this method better : https://ashutosh-tripathi.medium.com/calculating-merkle-root-and-proof-of-inclusion-in-bitcoin-ebd65f504af9
     public static String getMerkleRoot(ArrayList<Transaction> transactions) {
         int count = transactions.size();
-        ArrayList<String> previousTreeLayer = new ArrayList<>();
+        List<String> previousTreeLayer = new ArrayList<>();
 
         for (Transaction transaction : transactions) {
             previousTreeLayer.add(transaction.getTransactionId());
         }
-        ArrayList<String> treeLayer = previousTreeLayer;
+        List<String> treeLayer = previousTreeLayer;
         while(count > 1) {
             treeLayer = new ArrayList<>();
             for (int i=1; i < previousTreeLayer.size(); i++) {

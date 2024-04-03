@@ -2,14 +2,16 @@ package com.testehan.blockchain;
 
 
 import com.testehan.blockchain.transaction.Transaction;
+import com.testehan.blockchain.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 public class Block {
+    public static final String GENESIS_BLOCK_HASH = "0";
     public String currentBlockHash;
     public String previousBlockHash;
-    private long timeStamp; //millis since 1970.
+    private long creationTimeStamp; //millis since 1970.
 
     /*
         Bitcoin block 813,958, mined on Oct. 26, 2023 by AntPool, a cluster of miners known as a
@@ -24,12 +26,15 @@ public class Block {
 
     private String merkleRoot;
 
-    public ArrayList<Transaction> transactions = new ArrayList<>(); //our data will be a simple message.
+    public ArrayList<Transaction> transactions = new ArrayList<>(); //data contained in block is a list of transactions
+
+    public Block() {
+        this(GENESIS_BLOCK_HASH);
+    }
 
     public Block(String previousHash ) {
         this.previousBlockHash = previousHash;
-        this.timeStamp = new Date().getTime();
-
+        this.creationTimeStamp = new Date().getTime();
         this.currentBlockHash = calculateHash();
     }
 
@@ -42,13 +47,13 @@ public class Block {
     }
 
 
-    public long getTimeStamp() {
-        return timeStamp;
+    public long getCreationTimeStamp() {
+        return creationTimeStamp;
     }
 
     // We will calculate the hash from all parts of the block we don’t want to be tampered with
     public String getHashableData(){
-        return previousBlockHash + timeStamp + nonce + merkleRoot;
+        return previousBlockHash + creationTimeStamp + nonce + merkleRoot;
     }
 
     public void mineBlock(int difficulty) {
@@ -70,8 +75,8 @@ public class Block {
             return false;
         }
 
-        if((!"0".equals(previousBlockHash))) {
-            if((transaction.processTransaction() != true)) {
+        if((!GENESIS_BLOCK_HASH.equals(previousBlockHash))) {
+            if((transaction.isTransactionValid() != true)) {
                 System.out.println("Transaction failed to process. Discarded.");
                 return false;
             }

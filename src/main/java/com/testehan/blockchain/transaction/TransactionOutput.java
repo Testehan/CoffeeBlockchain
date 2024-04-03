@@ -1,6 +1,6 @@
 package com.testehan.blockchain.transaction;
 
-import com.testehan.blockchain.StringUtil;
+import com.testehan.blockchain.util.StringUtil;
 
 import java.security.PublicKey;
 
@@ -20,7 +20,7 @@ public class TransactionOutput {
     }
 
     //Check if coin belongs to you
-    public boolean isMine(PublicKey publicKey) {
+    public boolean belongsToWallet(PublicKey publicKey) {
         return (publicKey == reciepient);
     }
 

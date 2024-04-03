@@ -20,7 +20,7 @@ public class CoffeeBlockchain
 
     public static Map<String, TransactionOutput> unspentTransactions = new HashMap<>();
 
-    public static void addBlock(Block newBlock) {
+    public static void addToBlockchain(Block newBlock) {
         newBlock.mineBlock(difficulty);
         blockchain.add(newBlock);
     }
@@ -87,7 +87,7 @@ public class CoffeeBlockchain
                     tempUTXOs.put(output.getId(), output);
                 }
 
-                if( currentTransaction.getOutputTransactions().get(0).getReciepient() != currentTransaction.getReciepient()) {
+                if( currentTransaction.getOutputTransactions().get(0).getReciepient() != currentTransaction.getRecipient()) {
                     System.out.println("#Transaction(" + t + ") output recipient is not who it should be");
                     return false;
                 }
@@ -101,5 +101,17 @@ public class CoffeeBlockchain
         }
         System.out.println("Blockchain is valid");
         return true;
+    }
+
+    public static long getBalanceAvailableForWallet(Wallet wallet) {
+        long balanceAvailable = 0;
+        for (Map.Entry<String, TransactionOutput> item: unspentTransactions.entrySet()){
+            TransactionOutput unspentTransaction = item.getValue();
+            if (unspentTransaction.belongsToWallet(wallet.getPublicKey())) {
+                wallet.addUnspentTransaction(unspentTransaction);
+                balanceAvailable = balanceAvailable + unspentTransaction.getValue() ;
+            }
+        }
+        return balanceAvailable;
     }
 }
