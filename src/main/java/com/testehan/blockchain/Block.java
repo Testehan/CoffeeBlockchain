@@ -1,14 +1,14 @@
 package com.testehan.blockchain;
 
 
-import java.util.Date;
+import com.testehan.blockchain.transaction.Transaction;
 
-import static com.testehan.blockchain.BlockUtil.calculateHash;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Block {
     public String currentBlockHash;
     public String previousBlockHash;
-    private String data;
     private long timeStamp; //millis since 1970.
 
     /*
@@ -22,12 +22,15 @@ public class Block {
      */
     private int nonce; // https://en.wikipedia.org/wiki/Cryptographic_nonce
 
-    public Block(String data,String previousHash ) {
-        this.data = data;
+    private String merkleRoot;
+
+    public ArrayList<Transaction> transactions = new ArrayList<>(); //our data will be a simple message.
+
+    public Block(String previousHash ) {
         this.previousBlockHash = previousHash;
         this.timeStamp = new Date().getTime();
 
-        this.currentBlockHash = calculateHash(this);
+        this.currentBlockHash = calculateHash();
     }
 
     public String getCurrentBlockHash() {
@@ -38,9 +41,6 @@ public class Block {
         return previousBlockHash;
     }
 
-    public String getData() {
-        return data;
-    }
 
     public long getTimeStamp() {
         return timeStamp;
@@ -48,16 +48,41 @@ public class Block {
 
     // We will calculate the hash from all parts of the block we don’t want to be tampered with
     public String getHashableData(){
-        return previousBlockHash + timeStamp + nonce + data;
+        return previousBlockHash + timeStamp + nonce + merkleRoot;
     }
 
     public void mineBlock(int difficulty) {
+        merkleRoot = StringUtil.getMerkleRoot(transactions);
+
         // target is a string containing a number of "difficulty" 0s    ..like "0000" for difficulty 4
         String target = new String(new char[difficulty]).replace('\0', '0');
-        while(!currentBlockHash.substring( 0, difficulty).equals(target)) {
+        while (!currentBlockHash.substring( 0, difficulty).equals(target)) {
             nonce ++;
-            currentBlockHash = calculateHash(this);
+            currentBlockHash = calculateHash();
         }
         System.out.println("Block Mined!!! : " + currentBlockHash);
+    }
+
+    //Add transactions to this block
+    public boolean addTransaction(Transaction transaction) {
+        //process transaction and check if valid, unless block is genesis block then ignore.
+        if(transaction == null){
+            return false;
+        }
+
+        if((!"0".equals(previousBlockHash))) {
+            if((transaction.processTransaction() != true)) {
+                System.out.println("Transaction failed to process. Discarded.");
+                return false;
+            }
+        }
+
+        transactions.add(transaction);
+        System.out.println("Transaction Successfully added to Block");
+        return true;
+    }
+
+    public String calculateHash() {
+        return StringUtil.applySha256(getHashableData());
     }
 }

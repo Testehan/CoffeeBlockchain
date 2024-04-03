@@ -1,6 +1,9 @@
 package com.testehan.blockchain;
 
+import com.testehan.blockchain.transaction.Transaction;
+
 import java.security.*;
+import java.util.ArrayList;
 import java.util.Base64;
 
 public class StringUtil {
@@ -55,5 +58,28 @@ public class StringUtil {
 
     public static String getStringFromKey(Key key) {
         return Base64.getEncoder().encodeToString(key.getEncoded());
+    }
+
+    //Tacks in array of transactions and returns a merkle root.
+    // TODO Try to understand this method better : https://ashutosh-tripathi.medium.com/calculating-merkle-root-and-proof-of-inclusion-in-bitcoin-ebd65f504af9
+    public static String getMerkleRoot(ArrayList<Transaction> transactions) {
+        int count = transactions.size();
+        ArrayList<String> previousTreeLayer = new ArrayList<>();
+
+        for (Transaction transaction : transactions) {
+            previousTreeLayer.add(transaction.getTransactionId());
+        }
+        ArrayList<String> treeLayer = previousTreeLayer;
+        while(count > 1) {
+            treeLayer = new ArrayList<>();
+            for (int i=1; i < previousTreeLayer.size(); i++) {
+                treeLayer.add(applySha256(previousTreeLayer.get(i-1) + previousTreeLayer.get(i)));
+            }
+            count = treeLayer.size();
+            previousTreeLayer = treeLayer;
+        }
+
+        String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
+        return merkleRoot;
     }
 }
